@@ -53,6 +53,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule implements Act
 
     private Uri mCameraCaptureURI;
     private Uri mImageLibSelectedURI;
+    private Uri mCroppedURI;
     private Callback mCallback;
     private Boolean noData = false;
     private Boolean tmpImage;
@@ -296,10 +297,14 @@ public class ImagePickerModule extends ReactContextBaseJavaModule implements Act
                 }
                 break;
             case REQUEST_PHOTO_CUT:
-                if(data.getData() == null){
-                    //Compatible for android 4.1-4.3
-                    uri = Uri.parse( data.getAction() );
-                }else{
+                if (data.getData() == null) {
+                    if (data.getAction() == null) {
+                        uri = mCroppedURI;
+                    } else {
+                        //Compatible for android 4.1-4.3
+                        uri = Uri.parse(data.getAction());
+                    }
+                } else {
                     //android 4.4+
                     uri = data.getData();
                 }
@@ -413,6 +418,9 @@ public class ImagePickerModule extends ReactContextBaseJavaModule implements Act
         intent.putExtra("crop", "true");
         intent.putExtra("aspectX", aspectX);
         intent.putExtra("aspectY", aspectY);
+        File imageFile = createNewFile(true);
+        mCroppedURI = Uri.fromFile(imageFile);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(imageFile));
 
         Activity currentActivity = getCurrentActivity();
 
